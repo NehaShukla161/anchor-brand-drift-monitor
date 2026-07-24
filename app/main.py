@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from pydantic import BaseModel
 
 from app import storage, embeddings, genblaze_pipeline
@@ -118,3 +118,9 @@ def get_asset(key: str):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+def dashboard():
+    """Serves the Anchor dashboard so judges can use the app from one URL."""
+    return FileResponse("frontend/index.html")

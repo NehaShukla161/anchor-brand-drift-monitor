@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: anchor
+    runtime: python
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: B2_KEY_ID
+        sync: false
+      - key: B2_APP_KEY
+        sync: false
+      - key: B2_BUCKET
+        value: BrandBucket2916
+      - key: B2_REGION
+        sync: false
+      - key: GMI_API_KEY
+        sync: false
+      - key: DRIFT_THRESHOLD
+        value: "0.75"
