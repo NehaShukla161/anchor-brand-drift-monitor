@@ -1,0 +1,14 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Secrets — never commit real credentials
+.env
+
+# OS junk
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

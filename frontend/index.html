@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchor — Brand Drift Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #10151c;
+    --ink-2: #161d26;
+    --ink-3: #1c2530;
+    --line: #2a323d;
+    --paper: #ece5d6;
+    --paper-dim: #8d96a3;
+    --brass: #c89b5c;
+    --brass-bright: #e3b872;
+    --drift: #b5533c;
+    --drift-bright: #d16c52;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(200,155,92,0.08), transparent),
+      var(--ink);
+    color:var(--paper);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:56px 24px 120px;}
+
+  header{margin-bottom:64px;}
+  .wordmark{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:clamp(40px,6vw,56px);
+    letter-spacing:-0.01em;
+    color:var(--paper);
+    margin:0;
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+  }
+  .wordmark .glyph{
+    font-style:italic;
+    font-weight:500;
+    color:var(--brass);
+    font-size:0.7em;
+  }
+  .tagline{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin:10px 0 0;
+  }
+
+  section{margin-bottom:48px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--brass);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow .numeral{
+    border:1px solid var(--brass);
+    border-radius:50%;
+    width:20px;height:20px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:10px;
+    color:var(--brass);
+  }
+  .panel{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 6px;
+    color:var(--paper);
+  }
+  .desc{color:var(--paper-dim);font-size:14px;margin:0 0 22px;max-width:560px;}
+
+  label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin-bottom:8px;
+  }
+  input[type=text], textarea, select{
+    width:100%;
+    background:var(--ink);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:11px 13px;
+    outline:none;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{border-color:var(--brass);}
+  textarea{resize:vertical;min-height:76px;}
+  .field{margin-bottom:16px;}
+  .row{display:flex;gap:16px;}
+  .row > *{flex:1;}
+
+  input[type=file]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    color:var(--paper-dim);
+    padding:10px 0;
+  }
+  input[type=file]::file-selector-button{
+    background:var(--ink-3);
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:8px 14px;
+    border-radius:var(--radius);
+    margin-right:12px;
+    cursor:pointer;
+  }
+
+  button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:var(--brass);
+    color:var(--ink);
+    border:none;
+    border-radius:var(--radius);
+    padding:12px 22px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  button:hover:not(:disabled){background:var(--brass-bright);}
+  button:disabled{background:var(--ink-3);color:var(--paper-dim);cursor:not-allowed;}
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+    outline:2px solid var(--brass-bright);outline-offset:2px;
+  }
+
+  .status{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--paper-dim);
+    margin-top:14px;
+    min-height:16px;
+  }
+  .status.ok{color:var(--brass);}
+  .status.err{color:var(--drift-bright);}
+
+  /* --- the reading: signature drift gauge --- */
+  .reading{display:grid;grid-template-columns:180px 1fr;gap:26px;align-items:center;}
+  .reading img{width:180px;height:180px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--line);background:var(--ink);}
+  .reading-empty{color:var(--paper-dim);font-size:14px;font-style:italic;}
+
+  .gauge-label{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--paper-dim);margin-bottom:8px;}
+  .gauge{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg, var(--drift) 0%, var(--drift) 40%, #7a6a4a 55%, var(--brass) 75%, var(--brass) 100%);}
+  .gauge .threshold{position:absolute;top:-4px;bottom:-4px;width:1px;background:rgba(236,229,214,0.5);}
+  .gauge .needle{
+    position:absolute;top:-6px;
+    width:2px;height:22px;
+    background:var(--paper);
+    transform:translateX(-1px);
+    box-shadow:0 0 6px rgba(236,229,214,0.6);
+  }
+  .score-row{display:flex;align-items:baseline;justify-content:space-between;margin-top:14px;}
+  .score{font-family:'Fraunces',serif;font-weight:700;font-size:34px;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+    padding:5px 11px;border-radius:20px;
+  }
+  .badge.true{background:rgba(200,155,92,0.15);color:var(--brass);border:1px solid rgba(200,155,92,0.4);}
+  .badge.flagged{background:rgba(181,83,60,0.15);color:var(--drift-bright);border:1px solid rgba(181,83,60,0.4);}
+  .reading-prompt{color:var(--paper-dim);font-size:13px;margin-top:12px;font-style:italic;}
+
+  /* --- drift log --- */
+  .log-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+  .log-count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--paper-dim);}
+  svg.trend{width:100%;height:120px;display:block;margin-bottom:22px;}
+  table{width:100%;border-collapse:collapse;}
+  th{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--paper-dim);
+    text-align:left;
+    padding:0 10px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:12px 10px;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+    vertical-align:middle;
+  }
+  td.mono, th.mono{font-family:'IBM Plex Mono',monospace;}
+  .empty-row td{color:var(--paper-dim);font-style:italic;text-align:center;padding:30px 10px;}
+
+  footer{margin-top:64px;color:var(--paper-dim);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1 class="wordmark">Anchor<span class="glyph">·</span></h1>
+    <p class="tagline">Brand drift monitor for generative media</p>
+  </header>
+
+  <section>
+    <div class="eyebrow"><span class="numeral">I</span> Set the anchor point</div>
+    <div class="panel">
+      <h2>Reference kit</h2>
+      <p class="desc">Upload three or more images that represent the brand's visual style. Anchor averages them into a centroid — the fixed point every future generation is measured against.</p>
+      <div class="field">
+        <label for="brandId">Brand ID</label>
+        <input type="text" id="brandId" value="testbrand" placeholder="e.g. acme">
+      </div>
+      <div class="field">
+        <label for="refFiles">Reference images (3+)</label>
+        <input type="file" id="refFiles" accept="image/*" multiple>
+      </div>
+      <button id="setAnchorBtn">Set anchor point</button>
+      <div class="status" id="anchorStatus"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow"><span class="numeral">II</span> Generate &amp; measure</div>
+    <div class="panel">
+      <h2>New asset</h2>
+      <p class="desc">Describe what to generate. Anchor routes it through Genblaze, then scores the result against the anchor point.</p>
+      <div class="field">
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt" placeholder="a minimalist skincare bottle on a beige background, soft natural light"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="provider">Provider</label>
+          <select id="provider">
+            <option value="gmicloud">gmicloud</option>
+            <option value="openai">openai</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="model">Model (optional)</label>
+          <input type="text" id="model" placeholder="uses provider default">
+        </div>
+      </div>
+      <button id="generateBtn">Generate &amp; measure</button>
+      <div class="status" id="generateStatus"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow"><span class="numeral">III</span> Reading</div>
+    <div class="panel">
+      <div id="readingEmpty" class="reading-empty">No reading yet — generate an asset above to see its drift score.</div>
+      <div id="reading" class="reading" style="display:none;">
+        <img id="readingImg" alt="Generated asset">
+        <div>
+          <div class="gauge-label"><span>Drifted</span><span>True to brand</span></div>
+          <div class="gauge">
+            <div class="threshold" id="thresholdMark"></div>
+            <div class="needle" id="needleMark"></div>
+          </div>
+          <div class="score-row">
+            <span class="score" id="scoreValue">—</span>
+            <span class="badge" id="flagBadge">—</span>
+          </div>
+          <p class="reading-prompt" id="readingPrompt"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Drift log</div>
+    <div class="panel">
+      <div class="log-header">
+        <h2 style="margin:0;">History for this brand</h2>
+        <span class="log-count" id="logCount">0 generations</span>
+      </div>
+      <svg class="trend" id="trendSvg" viewBox="0 0 640 120" preserveAspectRatio="none"></svg>
+      <table>
+        <thead>
+          <tr>
+            <th>Thumb</th>
+            <th>Prompt</th>
+            <th class="mono">Provider</th>
+            <th class="mono">Score</th>
+            <th>Status</th>
+            <th class="mono">Time</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr class="empty-row"><td colspan="6">No generations yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Backblaze Generative Media Hackathon · built on Genblaze + Backblaze B2</footer>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+const THRESHOLD = 0.75;
+
+const $ = (id) => document.getElementById(id);
+
+function currentBrandId(){
+  return $("brandId").value.trim() || "testbrand";
+}
+
+// ---------- I. set anchor point ----------
+$("setAnchorBtn").addEventListener("click", async () => {
+  const brandId = currentBrandId();
+  const files = $("refFiles").files;
+  const statusEl = $("anchorStatus");
+
+  if (files.length < 3){
+    statusEl.textContent = "Select at least 3 images.";
+    statusEl.className = "status err";
+    return;
+  }
+
+  const form = new FormData();
+  for (const f of files) form.append("files", f);
+
+  statusEl.textContent = "Uploading and computing centroid — this can take a moment...";
+  statusEl.className = "status";
+  $("setAnchorBtn").disabled = true;
+
+  try {
+    const res = await fetch(`${API}/brand-kits/${encodeURIComponent(brandId)}/reference`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    statusEl.textContent = `Anchor set from ${data.reference_images_stored} images for "${brandId}".`;
+    statusEl.className = "status ok";
+    loadHistory();
+  } catch (e) {
+    statusEl.textContent = `Failed: ${e.message}`;
+    statusEl.className = "status err";
+  } finally {
+    $("setAnchorBtn").disabled = false;
+  }
+});
+
+// ---------- II. generate & measure ----------
+$("generateBtn").addEventListener("click", async () => {
+  const brandId = currentBrandId();
+  const prompt = $("prompt").value.trim();
+  const provider = $("provider").value;
+  const model = $("model").value.trim() || null;
+  const statusEl = $("generateStatus");
+
+  if (!prompt){
+    statusEl.textContent = "Write a prompt first.";
+    statusEl.className = "status err";
+    return;
+  }
+
+  statusEl.textContent = "Generating through Genblaze — this can take up to a minute...";
+  statusEl.className = "status";
+  $("generateBtn").disabled = true;
+
+  try {
+    const res = await fetch(`${API}/brand-kits/${encodeURIComponent(brandId)}/generate`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({prompt, provider, model}),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    statusEl.textContent = `Scored ${data.drift_score.toFixed(3)}.`;
+    statusEl.className = "status ok";
+    showReading(data);
+    loadHistory();
+  } catch (e) {
+    statusEl.textContent = `Failed: ${e.message}`;
+    statusEl.className = "status err";
+  } finally {
+    $("generateBtn").disabled = false;
+  }
+});
+
+function showReading(entry){
+  $("readingEmpty").style.display = "none";
+  $("reading").style.display = "grid";
+  $("readingImg").src = `${API}/assets/${entry.asset_key}`;
+  $("needleMark").style.left = `${entry.drift_score * 100}%`;
+  $("thresholdMark").style.left = `${THRESHOLD * 100}%`;
+  $("scoreValue").textContent = entry.drift_score.toFixed(3);
+  const badge = $("flagBadge");
+  if (entry.flagged){
+    badge.textContent = "Drift flagged";
+    badge.className = "badge flagged";
+  } else {
+    badge.textContent = "True to brand";
+    badge.className = "badge true";
+  }
+  $("readingPrompt").textContent = `"${entry.prompt}"`;
+}
+
+// ---------- drift log ----------
+async function loadHistory(){
+  const brandId = currentBrandId();
+  try {
+    const res = await fetch(`${API}/brand-kits/${encodeURIComponent(brandId)}/drift-history`);
+    if (!res.ok) return;
+    const data = await res.json();
+    renderHistory(data.entries || []);
+  } catch (e) {
+    // silent — history is supplementary, not blocking
+  }
+}
+
+function renderHistory(entries){
+  $("logCount").textContent = `${entries.length} generation${entries.length === 1 ? "" : "s"}`;
+  const body = $("logBody");
+
+  if (entries.length === 0){
+    body.innerHTML = '<tr class="empty-row"><td colspan="6">No generations yet.</td></tr>';
+    drawTrend([]);
+    return;
+  }
+
+  body.innerHTML = entries.slice().reverse().map(e => `
+    <tr>
+      <td>${e.asset_key ? `<img src="${API}/assets/${e.asset_key}" onerror="this.style.display='none'" style="width:40px;height:40px;object-fit:cover;border-radius:2px;border:1px solid var(--line);">` : `<span style="color:var(--paper-dim);font-size:11px;">—</span>`}</td>
+      <td>${escapeHtml(truncate(e.prompt, 48))}</td>
+      <td class="mono">${escapeHtml(e.provider)}</td>
+      <td class="mono">${e.drift_score.toFixed(3)}</td>
+      <td><span class="badge ${e.flagged ? "flagged" : "true"}">${e.flagged ? "Flagged" : "On brand"}</span></td>
+      <td class="mono">${formatTime(e.timestamp)}</td>
+    </tr>
+  `).join("");
+
+  drawTrend(entries);
+}
+
+function drawTrend(entries){
+  const svg = $("trendSvg");
+  if (entries.length === 0){
+    svg.innerHTML = "";
+    return;
+  }
+  const w = 640, h = 120, pad = 12;
+  const n = entries.length;
+  const xStep = n > 1 ? (w - pad * 2) / (n - 1) : 0;
+
+  const points = entries.map((e, i) => {
+    const x = pad + i * xStep;
+    const y = pad + (1 - e.drift_score) * (h - pad * 2);
+    return {x, y, flagged: e.flagged};
+  });
+
+  const thresholdY = pad + (1 - THRESHOLD) * (h - pad * 2);
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+
+  const dots = points.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${p.flagged ? "var(--drift-bright)" : "var(--brass)"}" />`).join("");
+
+  svg.innerHTML = `
+    <line x1="0" y1="${thresholdY.toFixed(1)}" x2="${w}" y2="${thresholdY.toFixed(1)}" stroke="rgba(236,229,214,0.25)" stroke-width="1" stroke-dasharray="4 4" />
+    <path d="${linePath}" fill="none" stroke="var(--brass)" stroke-width="1.5" opacity="0.6" />
+    ${dots}
+  `;
+}
+
+function truncate(s, n){ return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+function escapeHtml(s){ const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function formatTime(iso){
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+}
+
+// reload history whenever brand id changes
+$("brandId").addEventListener("change", loadHistory);
+
+// initial load
+loadHistory();
+</script>
+</body>
+</html>
