@@ -10,7 +10,7 @@ Built for the [Backblaze Generative Media Hackathon](https://backblaze-generativ
 
 ## How it uses B2 and Genblaze
 
-- **Genblaze** orchestrates image generation across providers (GMICloud,
+- **Genblaze** orchestrates image generation across providers (GMICloud, 
   OpenAI, and more via `PROVIDERS` in `app/genblaze_pipeline.py`) through a
   single `Pipeline` call shape, and writes every asset + provenance
   manifest into the B2 bucket automatically via `ObjectStorageSink`.
@@ -23,7 +23,7 @@ Built for the [Backblaze Generative Media Hackathon](https://backblaze-generativ
 
 1. **Create a B2 application key**
    [secure.backblaze.com/app_keys.htm](https://secure.backblaze.com/app_keys.htm)
-   — needs read/write access to your bucket.
+   — needs read/write access to bucket.
 
 2. **Copy the env template and fill in credentials**
    ```bash
